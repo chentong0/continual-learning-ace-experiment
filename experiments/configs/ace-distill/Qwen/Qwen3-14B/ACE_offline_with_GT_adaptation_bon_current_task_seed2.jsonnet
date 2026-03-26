@@ -1,0 +1,96 @@
+local project_home_path = std.extVar("APPWORLD_PROJECT_PATH");
+local experiment_prompts_path = project_home_path + "/experiments/prompts";
+local experiment_playbooks_path = project_home_path + "/experiments/playbooks";
+local experiment_outputs_path = project_home_path + "/experiments/outputs/ace-distill/Qwen/Qwen3-14B/ACE_offline_with_GT_adaptation_bon_current_task_seed2/playbooks";
+
+local generator_model_config = {
+    "name": "Qwen/Qwen3-14B",
+    "provider": "openai",
+    "base_url": "http://localhost:30002/v1",
+    "api_key": "sglang",
+    "temperature": null,
+    "seed": 100,
+    "stop": null,
+    "logprobs": false,
+    "top_logprobs": null,
+    "frequency_penalty": 0,
+    "presence_penalty": 0,
+    "n": 1,
+    "response_format": {"type": "text"},
+    "retry_after_n_seconds": 10,
+    "use_cache": true,
+    "max_retries": 3,
+};
+
+local reflector_model_config = {
+    "name": "gpt-5.4-2026-03-05",
+    "provider": "openai",
+    "temperature": null,
+    "seed": 100,
+    "stop": null,
+    "logprobs": false,
+    "top_logprobs": null,
+    "frequency_penalty": 0,
+    "presence_penalty": 0,
+    "n": 1,
+    "response_format": {"type": "text"},
+    "retry_after_n_seconds": 10,
+    "use_cache": true,
+    "max_retries": 5,
+};
+
+local curator_model_config = {
+    "name": "gpt-5.4-2026-03-05",
+    "provider": "openai",
+    "temperature": 0.8,
+    "seed": 100,
+    "stop": null,
+    "logprobs": false,
+    "top_logprobs": null,
+    "frequency_penalty": 0,
+    "presence_penalty": 0,
+    "n": 1,
+    "response_format": {"type": "text"},
+    "retry_after_n_seconds": 10,
+    "use_cache": true,
+    "max_retries": 5,
+};
+
+{
+    "type": "ace",
+    "config": {
+        "run_type": "ace-adaptation",
+        "agent": {
+            "type": "ace_adaptation_react_bon",
+            "generator_model_config": generator_model_config,
+            "reflector_model_config": reflector_model_config,
+            "curator_model_config": curator_model_config,
+            "appworld_config": {
+                "random_seed": 123,
+            },
+            "logger_config": {
+                "color": true,
+                "verbose": true,
+            },
+            "generator_prompt_file_path": experiment_prompts_path + "/appworld_react_generator_prompt.txt",
+            "reflector_prompt_file_path": experiment_prompts_path + "/appworld_react_reflector_with_gt_prompt.txt",
+            "curator_prompt_file_path": experiment_prompts_path + "/appworld_react_curator_prompt.txt",
+            "initial_playbook_file_path": experiment_playbooks_path + "/appworld_empty_playbook.txt",
+            "trained_playbook_file_path": experiment_outputs_path + "/tasks/appworld_offline_trained_with_gt_playbook.txt",
+            "ignore_multiple_calls": true,
+            "max_steps": 20,
+            "num_retries": 1,
+            "max_cost_overall": 1000,
+            "max_cost_per_task": 10,
+            "log_lm_calls": true,
+            "use_gt_code": true,
+            "num_curator_samples": 4,
+            "playbook_delta_eval_mode": "current_task_pass_cases",
+            "playbook_delta_eval_num_tasks": 1,
+            "playbook_delta_eval_seed": 2,
+            "playbook_delta_eval_exclude_current_task": false,
+        },
+        "dataset": "train",
+        "dataset_seed": 2,
+    }
+}
